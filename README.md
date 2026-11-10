@@ -38,9 +38,23 @@ The pipeline checks out the configured repository revision, runs the test, and a
 
 Set `API_HOST` and `API_PORT` in **Build with Parameters**. `localhost` refers to the Jenkins agent; for a containerized agent, use a hostname that reaches your API outside that container. The API must already be running.
 
-The `jenkins-60s` Maven profile overrides the Ultimate Thread Group schedule with 3 users, zero initial delay, 1 second ramp-up, 58 seconds hold, and 1 second shutdown: 60 seconds total scheduled load. Setup, downloads, in-flight request completion, and report generation add to the overall build time. The pipeline has a separate 20-minute timeout. Normal Maven runs keep the schedule saved in the JMX.
+The pipeline uses the `jenkins-parameterized` Maven profile with these build parameters:
 
-To run the same profile locally:
+| Parameter | Default | Meaning |
+| --- | --- | --- |
+| `TEST_TYPE` | `smoke` | Run label: smoke, load, stress, or endurance. Does not change the load automatically. |
+| `ENVIRONMENT` | `qa` | Run label: qa or uat. Host and port still select the actual destination. |
+| `THREADS` | `100` | Concurrent users. |
+| `RAMP_UP` | `60` | Ramp-up in seconds. |
+| `DURATION` | `300` | Total scheduled load in seconds, including ramp-up and 1-second shutdown. |
+
+The hold period is `DURATION - RAMP_UP - 1`, which must be positive. The default schedule is 60 seconds ramp-up, 239 seconds hold, and 1 second shutdown. Test type and environment appear in the Jenkins build name and are forwarded as JMeter properties `test.type` and `test.environment`. All types run the same `Order-api.jmx`; choose load values appropriate to the selected type.
+
+Setup, downloads, in-flight request completion, and report generation add to the build time. The execution timeout allows `DURATION` plus 15 minutes for overhead, including endurance runs. Maven verification fails on failed samples; TPS/P95/P99 thresholds are not configured. Normal Maven runs keep the schedule saved in the JMX.
+
+After Jenkins loads the updated Jenkinsfile, the new parameters appear under **Build with Parameters**. The older `jenkins-60s` profile remains available for local 60-second runs.
+
+To run the original 60-second profile locally:
 
 ```powershell
 mvn clean verify -Pjenkins-60s
