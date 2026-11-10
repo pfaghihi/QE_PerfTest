@@ -41,7 +41,6 @@ pipeline {
                     if (params.DURATION.toInteger() <= params.RAMP_UP.toInteger() + 1) {
                         error('DURATION must exceed RAMP_UP + 1 second to allow a hold period and shutdown.')
                     }
-                    env.HOLD_SECONDS = (params.DURATION.toInteger() - params.RAMP_UP.toInteger() - 1).toString()
                     currentBuild.displayName = "#${env.BUILD_NUMBER} ${params.TEST_TYPE} / ${params.ENVIRONMENT}"
                     currentBuild.description = "${params.THREADS} users; ${params.RAMP_UP}s ramp; ${params.DURATION}s total"
                     if (!(params.API_HOST ==~ /[A-Za-z0-9][A-Za-z0-9.-]*/)) {
@@ -63,9 +62,9 @@ pipeline {
                     // Allow setup/reporting overhead as well as long endurance runs.
                     timeout(time: params.DURATION.toInteger() + 900, unit: 'SECONDS') {
                         if (isUnix()) {
-                            sh 'mvn -B -ntp clean verify -Pjenkins-parameterized "-Dapi.host=$API_HOST" "-Dapi.port=$API_PORT" "-Dtest.type=$TEST_TYPE" "-Dtest.environment=$ENVIRONMENT" "-Dload.threads=$THREADS" "-Dload.rampup=$RAMP_UP" "-Dload.hold=$HOLD_SECONDS"'
+                            sh 'mvn -B -ntp clean verify -Pjenkins-parameterized "-Dapi.host=$API_HOST" "-Dapi.port=$API_PORT" "-Dtest.type=$TEST_TYPE" "-Dtest.environment=$ENVIRONMENT" "-Dload.threads=$THREADS" "-Dload.rampup=$RAMP_UP" "-Dload.duration=$DURATION"'
                         } else {
-                            bat 'mvn -B -ntp clean verify -Pjenkins-parameterized "-Dapi.host=%API_HOST%" "-Dapi.port=%API_PORT%" "-Dtest.type=%TEST_TYPE%" "-Dtest.environment=%ENVIRONMENT%" "-Dload.threads=%THREADS%" "-Dload.rampup=%RAMP_UP%" "-Dload.hold=%HOLD_SECONDS%"'
+                            bat 'mvn -B -ntp clean verify -Pjenkins-parameterized "-Dapi.host=%API_HOST%" "-Dapi.port=%API_PORT%" "-Dtest.type=%TEST_TYPE%" "-Dtest.environment=%ENVIRONMENT%" "-Dload.threads=%THREADS%" "-Dload.rampup=%RAMP_UP%" "-Dload.duration=%DURATION%"'
                         }
                     }
                 }

@@ -1,3 +1,6 @@
 /target/
 /.m2/
 /jmeter.log
+__pycache__/
+*.pyc
+/jenkins/connection-status.json

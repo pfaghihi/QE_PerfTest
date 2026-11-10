@@ -66,7 +66,7 @@
         <test.environment>qa</test.environment>
         <load.threads>100</load.threads>
         <load.rampup>60</load.rampup>
-        <load.hold>239</load.hold>
+        <load.duration>300</load.duration>
       </properties>
       <build>
         <plugins>
@@ -75,7 +75,9 @@
             <artifactId>jmeter-maven-plugin</artifactId>
             <configuration>
               <propertiesUser>
-                <threads_schedule>spawn(${load.threads},0s,${load.rampup}s,${load.hold}s,1s)</threads_schedule>
+                <load.threads>${load.threads}</load.threads>
+                <load.rampup>${load.rampup}</load.rampup>
+                <load.duration>${load.duration}</load.duration>
                 <test.type>${test.type}</test.type>
                 <test.environment>${test.environment}</test.environment>
               </propertiesUser>
@@ -94,7 +96,9 @@
             <configuration>
               <propertiesUser>
                 <!-- 1s ramp-up + 58s hold + 1s shutdown = 60s. -->
-                <threads_schedule>spawn(3,0s,1s,58s,1s)</threads_schedule>
+                <load.threads>3</load.threads>
+                <load.rampup>1</load.rampup>
+                <load.duration>60</load.duration>
               </propertiesUser>
             </configuration>
           </plugin>
