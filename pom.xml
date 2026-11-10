@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example.performance</groupId>
+  <artifactId>order-api-performance-tests</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Order API performance tests</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jmeter.version>5.6.3</jmeter.version>
+    <api.host>localhost</api.host>
+    <api.port>8081</api.port>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.lazerycode.jmeter</groupId>
+        <artifactId>jmeter-maven-plugin</artifactId>
+        <version>3.8.0</version>
+        <executions>
+          <execution>
+            <id>configuration</id>
+            <goals><goal>configure</goal></goals>
+          </execution>
+          <execution>
+            <id>performance-tests</id>
+            <goals><goal>jmeter</goal></goals>
+          </execution>
+          <execution>
+            <id>check-results</id>
+            <goals><goal>results</goal></goals>
+          </execution>
+        </executions>
+        <configuration>
+          <jmeterVersion>${jmeter.version}</jmeterVersion>
+          <!-- Use the existing script in place so GUI edits are picked up. -->
+          <testFilesDirectory>${project.basedir}</testFilesDirectory>
+          <testFilesIncluded>
+            <jMeterTestFile>Order-api.jmx</jMeterTestFile>
+          </testFilesIncluded>
+          <jmeterExtensions>
+            <artifact>kg.apc:jmeter-plugins-casutg:2.10</artifact>
+          </jmeterExtensions>
+          <propertiesUser>
+            <api.host>${api.host}</api.host>
+            <api.port>${api.port}</api.port>
+          </propertiesUser>
+          <resultsFileFormat>csv</resultsFileFormat>
+          <generateReports>true</generateReports>
+          <ignoreResultFailures>false</ignoreResultFailures>
+          <errorRateThresholdInPercent>0</errorRateThresholdInPercent>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>jenkins-60s</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.lazerycode.jmeter</groupId>
+            <artifactId>jmeter-maven-plugin</artifactId>
+            <configuration>
+              <propertiesUser>
+                <!-- 1s ramp-up + 58s hold + 1s shutdown = 60s. -->
+                <threads_schedule>spawn(3,0s,1s,58s,1s)</threads_schedule>
+              </propertiesUser>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

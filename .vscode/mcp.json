@@ -1,0 +1,39 @@
+{
+    "inputs": [
+        {
+            "type": "promptString",
+            "id": "github_mcp_pat",
+            "description": "GitHub Personal Access Token",
+            "password": true
+        },
+        {
+            "type": "promptString",
+            "id": "jenkins_mcp_basic_auth",
+            "description": "Base64 of Jenkins username:API_TOKEN (without the Basic prefix)",
+            "password": true
+        }
+    ],
+    "servers": {
+        "github": {
+            "type": "stdio",
+            "command": "npx",
+            "args": [
+                "-y",
+                "mcp-remote@latest",
+                "https://api.githubcopilot.com/mcp/",
+                "--header",
+                "Authorization:${GITHUB_AUTH_HEADER}"
+            ],
+            "env": {
+                "GITHUB_AUTH_HEADER": "Bearer ${input:github_mcp_pat}"
+            }
+        },
+        "jenkins": {
+            "type": "http",
+            "url": "http://localhost:8088/mcp-server/mcp",
+            "headers": {
+                "Authorization": "Basic ${input:jenkins_mcp_basic_auth}"
+            }
+        }
+    }
+}
